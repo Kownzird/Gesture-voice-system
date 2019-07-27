@@ -22,12 +22,11 @@
 #include "gesture.h"
 #include "xml.h"
 
-
 int socket_fd;
 static FrameBuffer camera_frame;
 char jpgname[4][8]={"1.jpg","2.jpg","3.jpg","4.jpg"};
 char photo[4][7]={"p1.jpg","p2.jpg","p3.jpg","p4.jpg"};
-static int sent=0; //Êı¾İ´«Êä±êÖ¾Î»
+static int sent=0; //æ•°æ®ä¼ è¾“æ ‡å¿—ä½
 static int eid=-1;
 int ei=0;
 int quit_camera=0;
@@ -38,7 +37,7 @@ int x_min=0,y_min=0;
 int x, y, x1, x_n, y_n, x_c, y_c;
 int x_slip=0,y_slip=0;
 
-int mute; //¾²Òô±êÖ¾Î»
+int mute; //é™éŸ³æ ‡å¿—ä½
 int voice=50;
 int vedio_time = 0;
 char voice_buf[10]={0};
@@ -76,7 +75,7 @@ void *thread_ts(void *parg)
 	
 	while(1)
 	{	
-		//¶ÁÈ¡×ø±êÖµ
+		//è¯»å–åæ ‡å€¼
 		read(fd,&input_buf,sizeof(input_buf));
 		
 		if(input_buf.type == EV_ABS && input_buf.code == ABS_X)
@@ -89,28 +88,28 @@ void *thread_ts(void *parg)
 			y = input_buf.value;
 		}
 		
-		//ÅĞ¶Ïµ±Ç°µÄÊÍ·Å×´Ì¬£¬´¥ÃşÆÁ°´ÏÂºÍÊÍ·ÅÊÇÄ£Äâ°´¼üµÄ
+		//åˆ¤æ–­å½“å‰çš„é‡Šæ”¾çŠ¶æ€ï¼Œè§¦æ‘¸å±æŒ‰ä¸‹å’Œé‡Šæ”¾æ˜¯æ¨¡æ‹ŸæŒ‰é”®çš„
 		if(input_buf.type == EV_KEY && input_buf.code == BTN_TOUCH )
 		{
-			//ËÉ¿ª
+			//æ¾å¼€
 			if(input_buf.value == 0)
 			{
 				write(fd,leds_off_tbl[2],2); //D9_OFF
-				if(x > 400 && x < 720 && y > 70 && y < 150 && (sound_mode==0) && (gesture_mode==0)) //ÓïÒôÄ£Ê½
+				if(x > 400 && x < 720 && y > 70 && y < 150 && (sound_mode==0) && (gesture_mode==0)) //è¯­éŸ³æ¨¡å¼
 				{
 					sound_mode=1;
-					lcd_draw_jpg_file(0,0,"voice_mode.jpg");  //ÓïÒô½çÃæ
+					lcd_draw_jpg_file(0,0,"voice_mode.jpg");  //è¯­éŸ³ç•Œé¢
 					lcd_draw_jpg_file(0,0,"voice_mode.jpg");
 					system("madplay -a -30 enter_voice_mode.mp3");
 				}
-				else if(x > 400 && x < 720 && y > 200 && y < 280 && (sound_mode==0) && (gesture_mode==0)) //ÊÖÊÆÄ£Ê½
+				else if(x > 400 && x < 720 && y > 200 && y < 280 && (sound_mode==0) && (gesture_mode==0)) //æ‰‹åŠ¿æ¨¡å¼
 				{
 					gesture_mode=1;
-					lcd_draw_jpg_file(0,0,"gesture_mode.jpg");  //ÊÖÊÆ½çÃæ
+					lcd_draw_jpg_file(0,0,"gesture_mode.jpg");  //æ‰‹åŠ¿ç•Œé¢
 					lcd_draw_jpg_file(0,0,"gesture_mode.jpg");
 					system("madplay -a -30 enter_gesture_mode.mp3");
 				}
-				else if(x > 400 && x < 720 && y > 320 && y < 400 && (sound_mode==0) && (gesture_mode==0)) //ÍË³ö³ÌĞò
+				else if(x > 400 && x < 720 && y > 320 && y < 400 && (sound_mode==0) && (gesture_mode==0)) //é€€å‡ºç¨‹åº
 				{
 					quit_program=1;
 					lcd_draw_jpg_file(0,0,"goodbye.jpg");
@@ -118,19 +117,19 @@ void *thread_ts(void *parg)
 					system("madplay -a -30 goodbye.mp3");
 					exit(0);
 				}
-				//ÅÄÕÕ
+				//æ‹ç…§
 				else if(x > 700 && x < 791 && y >197 && y < 285 && press1 == 1 && show != 1)
 				{
 					printf("you have got a snap!\n");
 					lcd_draw_jpg_file(0,0,"camera.jpg");
-					/* ´´½¨jpgÍ¼Æ¬ */
+					/* åˆ›å»ºjpgå›¾ç‰‡ */
 					i++;
 					if(i==4) i=0;
 					linux_v4l2_save_image_file(photo[i],camera_frame);	
 					lcd_draw_jpg_file_ex(710,380,photo[i]);
 					snap=1;
 				}
-				//ä¯ÀÀÍ¼Æ¬
+				//æµè§ˆå›¾ç‰‡
 				else if(x > 707 && x < 791 && y >375 && y < 460 && press2 == 1 && show == 0)
 				{
 					printf("browse pictures!\n");
@@ -139,14 +138,14 @@ void *thread_ts(void *parg)
 					j=i;
 					pic_show=1;
 				}
-				//½áÊøä¯ÀÀÍ¼Æ¬
+				//ç»“æŸæµè§ˆå›¾ç‰‡
 				else if(x > 707 && x < 791 && y >375 && y < 460 && press2 == 1 && show == 1)
 				{
 					printf("camera on!\n");
 					show=0;
 					pic_show=0;
 				}
-				//ä¯ÀÀ×´Ì¬ÏÂÅĞ¶ÏÏò×óÏòÓÒ
+				//æµè§ˆçŠ¶æ€ä¸‹åˆ¤æ–­å‘å·¦å‘å³
 				else if(press3==1 && x<x1)
 				{
 					printf("next photo!\n");
@@ -170,7 +169,7 @@ void *thread_ts(void *parg)
 					}
 				}
 				
-				//Õı³£Ä£Ê½
+				//æ­£å¸¸æ¨¡å¼
 				else if(video_flag==0 && pic_show == 0)
 				{
 					lcd_draw_jpg_file(0,0,"ack.jpg");
@@ -180,53 +179,53 @@ void *thread_ts(void *parg)
 					
 				}
 			
-				//ÊÓÆµÄ£Ê½
+				//è§†é¢‘æ¨¡å¼
 				else if(video_flag==1)
 				{
 					x_n = x;
 					y_n = y;
 					
-					//×óÉÏ½ÇÍË³ö
+					//å·¦ä¸Šè§’é€€å‡º
 					if(x>0 && x<200 && y>0 && y<100)
 					{
-						video_quit(); //ÍË³öÊÓÆµ
-						video_flag=0; //Çå³ı²¥·ÅÊÓÆµ±êÖ¾Î»
+						video_quit(); //é€€å‡ºè§†é¢‘
+						video_flag=0; //æ¸…é™¤æ’­æ”¾è§†é¢‘æ ‡å¿—ä½
 					}
 					
-					//ÓÒÉÏ½Ç¾²Òô
+					//å³ä¸Šè§’é™éŸ³
 					if(x>600 && x<800 && y>0 && y<100)
 					{
-						video_mute(); //¾²Òô
+						video_mute(); //é™éŸ³
 					}
 					
-					//ÖĞ¼äÔİÍ£
+					//ä¸­é—´æš‚åœ
 					if(x>150 && x<650 && y>100 && y<400)
 					{
-						video_pause(); //ÔİÍ£»ò²¥·ÅÊÓÆµ
+						video_pause(); //æš‚åœæˆ–æ’­æ”¾è§†é¢‘
 					}
 					
-					//´ÓÉÏÍùÏÂ»¬¶¯100£¬ÒôÁ¿+10
+					//ä»ä¸Šå¾€ä¸‹æ»‘åŠ¨100ï¼ŒéŸ³é‡+10
 					if(y_slip > 100)
 					{
-						video_voice_up(); //Ôö¼ÓÒôÁ¿
+						video_voice_up(); //å¢åŠ éŸ³é‡
 					}
 					
-					//´ÓÏÂÍùÉÏ»¬¶¯100£¬ÒôÁ¿-10
+					//ä»ä¸‹å¾€ä¸Šæ»‘åŠ¨100ï¼ŒéŸ³é‡-10
 					if(y_slip < -100)
 					{
-						video_voice_down(); //¼õĞ¡ÒôÁ¿
+						video_voice_down(); //å‡å°éŸ³é‡
 					}
 					
-					//´ÓÓÒÍù×ó»¬¶¯200£¬Ê±¼ä-10
+					//ä»å³å¾€å·¦æ»‘åŠ¨200ï¼Œæ—¶é—´-10
 					if(x_slip > 100)
 					{
-						video_backward(); //ºóÍË10Ãë
+						video_backward(); //åé€€10ç§’
 					}
 					
-					//´Ó×óÍùÓÒ»¬¶¯200£¬Ê±¼ä+10
+					//ä»å·¦å¾€å³æ»‘åŠ¨200ï¼Œæ—¶é—´+10
 					if(x_slip < -100)
 					{
-						video_forward(); //Ç°½ø10Ãë
+						video_forward(); //å‰è¿›10ç§’
 					}
 				}
 				press1=0;
@@ -236,18 +235,18 @@ void *thread_ts(void *parg)
 			else
 			{
 				write(fd,leds_on_tbl[2],2); //D9_ON
-				//ÅÄÕÕ
+				//æ‹ç…§
 				if(x > 700 && x < 791 && y >197 && y<285 && show != 1)
 				{
 					lcd_draw_jpg_file(0,0,"record.jpg");
 					press1=1;
 				}
-				//Ô¤ÀÀ
+				//é¢„è§ˆ
 				else if(x > 700 && x < 791 && y >375 && y<460)
 				{
 					press2=1;
 				}	
-				//»¬¶¯ä¯ÀÀ
+				//æ»‘åŠ¨æµè§ˆ
 				else if(x <= 640 && show == 1)
 				{
 					press3=1;
@@ -286,23 +285,23 @@ void *thread_music(void *parg)
 
 void *thread_send(void *parg)
 {
-	//¿ªÊ¼Â¼Òô
+	//å¼€å§‹å½•éŸ³
 	system("arecord -d3 -c1 -r16000 -traw -fS16_LE cmd.pcm");	
-	//ÏòÓïÒôÊ¶±ğÒıÇæÏµÍ³·¢ËÍcmd.pcm
+	//å‘è¯­éŸ³è¯†åˆ«å¼•æ“ç³»ç»Ÿå‘é€cmd.pcm
 	tcp_send_pcm(socket_fd,"cmd.pcm");
 	
 		
-	//´ÓÓïÒôÊ¶±ğÒıÇæÏµÍ³½ÓÊÕXML½á¹û£¬²¢½«½á¹û±£´æµ½result.xml	
+	//ä»è¯­éŸ³è¯†åˆ«å¼•æ“ç³»ç»Ÿæ¥æ”¶XMLç»“æœï¼Œå¹¶å°†ç»“æœä¿å­˜åˆ°result.xml	
 	tcp_recv_xml(socket_fd);	
 	
-	//·ÖÎöresult.xml
+	//åˆ†æresult.xml
 	xmlChar *id = parse_xml("result.xml");
 	if(id)
 	{
-		//´òÓ¡idºÅ
+		//æ‰“å°idå·
 		printf("id=%s\n",id);
 				
-		//¸ù¾İidºÅÏìÓ¦²»Í¬µÄ²Ù×÷
+		//æ ¹æ®idå·å“åº”ä¸åŒçš„æ“ä½œ
 		eid=atoi(id);
 		choose=1;
 	}
@@ -313,7 +312,7 @@ void *thread_send(void *parg)
 int main (int argc,char **argv)
 {
 
-	struct timeval timeout={5,0};//ÉèÖÃ·¢ËÍ³¬Ê±
+	struct timeval timeout={5,0};//è®¾ç½®å‘é€è¶…æ—¶
 	
 	pthread_t tid_send;
 	pthread_t tid_ts;
@@ -328,7 +327,7 @@ int main (int argc,char **argv)
 	
 	password();
 	
-	//´´½¨Ì×½Ó×Ö£¬Ğ­ÒéÎªIPv4£¬ÀàĞÍÎªTCP
+	//åˆ›å»ºå¥—æ¥å­—ï¼Œåè®®ä¸ºIPv4ï¼Œç±»å‹ä¸ºTCP
 	socket_fd = socket(AF_INET,SOCK_STREAM,0);
 	
 	if(socket_fd<0)
@@ -350,10 +349,10 @@ int main (int argc,char **argv)
 	struct sockaddr_in	 dest_addr;
 	
 	dest_addr.sin_family 		= AF_INET;					//IPv4
-	dest_addr.sin_port   		= htons(54321);				//Ä¿µÄ¶Ë¿ÚÎª54321
-	dest_addr.sin_addr.s_addr	= inet_addr("192.168.18.56");	//Ä¿µÄIPµØÖ·ÌîĞ´
+	dest_addr.sin_port   		= htons(54321);				//ç›®çš„ç«¯å£ä¸º54321
+	dest_addr.sin_addr.s_addr	= inet_addr("192.168.18.56");	//ç›®çš„IPåœ°å€å¡«å†™
 	
-	//ÉèÖÃ·¢ËÍ³¬Ê±
+	//è®¾ç½®å‘é€è¶…æ—¶
 	 rt = setsockopt(socket_fd,SOL_SOCKET,SO_SNDTIMEO,(const char *)&timeout,sizeof timeout);
 	 if(rt < 0)
 	 {
@@ -361,7 +360,7 @@ int main (int argc,char **argv)
 	  return -1;
 	 }
 	 
-	 //ÉèÖÃ½ÓÊÕ³¬Ê±
+	 //è®¾ç½®æ¥æ”¶è¶…æ—¶
 	 rt = setsockopt(socket_fd,SOL_SOCKET,SO_RCVTIMEO,(const char *)&timeout,sizeof timeout);
 	 if(rt < 0)
 	 {
@@ -370,7 +369,7 @@ int main (int argc,char **argv)
 	 }
 
 	
-	//Òª¸ú·şÎñÆ÷½¨Á¢Á¬½Ó£¨µÈÍ¬ÓÚµÇÂ½ÓÎÏ·£©
+	//è¦è·ŸæœåŠ¡å™¨å»ºç«‹è¿æ¥ï¼ˆç­‰åŒäºç™»é™†æ¸¸æˆï¼‰
 	rt=connect(socket_fd,(struct sockaddr *)&dest_addr,sizeof dest_addr);
 	
 	if(rt < 0)
@@ -387,20 +386,20 @@ int main (int argc,char **argv)
 	pthread_create(&tid_ts,NULL,thread_ts,NULL);
 	pthread_create(&tid_gesture,NULL,thread_gesture,NULL);
 	
-	//Æô¶¯»­Ãæ
+	//å¯åŠ¨ç”»é¢
 	lcd_draw_jpg_file(0,0,"welcome.jpg");
 	system("madplay -a -30 welcome.mp3");
-	//´ò¿ªÉãÏñÍ·Éè±¸
+	//æ‰“å¼€æ‘„åƒå¤´è®¾å¤‡
 	linux_v4l2_device_init("/dev/video7",640,480);
 
-	//Æô¶¯ÉãÏñÍ·²¶×½
+	//å¯åŠ¨æ‘„åƒå¤´æ•æ‰
 	linux_v4l2_start_capturing();
 	
-	//¸ù¾İidºÅÏìÓ¦²»Í¬µÄ²Ù×÷
+	//æ ¹æ®idå·å“åº”ä¸åŒçš„æ“ä½œ
 	while(1)
 	{
 		
-		if((sound_mode==1)&&(gesture_mode==0))  //ÓïÒôÄ£Ê½
+		if((sound_mode==1)&&(gesture_mode==0))  //è¯­éŸ³æ¨¡å¼
 		{
 			if(sent==1)
 			{
@@ -411,25 +410,25 @@ int main (int argc,char **argv)
 			{
 				if(ei==1 && eid == 1)
 				{
-				//ÅÄÕÕ
+				//æ‹ç…§
 					lcd_draw_jpg_file(0,0,"camera.jpg");
 					quit_camera=0;
 					while(quit_camera==0)
 					{
-						//»ñÈ¡ÉãÏñÍ·µÄÊı¾İ
+						//è·å–æ‘„åƒå¤´çš„æ•°æ®
 						linux_v4l2_get_frame(&camera_frame);
 							
-						//ÏÔÊ¾ÉãÏñÍ·µÄÊı¾İ
+						//æ˜¾ç¤ºæ‘„åƒå¤´çš„æ•°æ®
 						lcd_draw_camera(0,0,camera_frame);
 						
 						lcd_draw_jpg_file_ex(710,380,photo[i]);
 						
-						//ÅÄÕÕ±£´æÕÕÆ¬
+						//æ‹ç…§ä¿å­˜ç…§ç‰‡
 						if(snap==1 && show!=1)
 						{
 							snap=0;
 						}
-						//ä¯ÀÀÍ¼Æ¬×´Ì¬ÏÂÏÈÕ¹Ê¾×îºóÒ»ÕÅ£¬È»ºóµÈ´ıshow±ä»¯
+						//æµè§ˆå›¾ç‰‡çŠ¶æ€ä¸‹å…ˆå±•ç¤ºæœ€åä¸€å¼ ï¼Œç„¶åç­‰å¾…showå˜åŒ–
 						if(show==1)
 						{
 							while(show==1) usleep(10*1000);
@@ -443,7 +442,7 @@ int main (int argc,char **argv)
 				
 				if(ei==1 && eid == 2)
 				{
-				//¿ªµÆ
+				//å¼€ç¯
 					write(fd_led,leds_on_tbl[0],2);  //D7_ON
 					printf("open light\n");
 					lcd_draw_jpg_file(0,0,"light_on.jpg");
@@ -452,7 +451,7 @@ int main (int argc,char **argv)
 				
 				if(ei==1 && eid == 3)
 				{
-				//¹ØµÆ
+				//å…³ç¯
 					write(fd_led,leds_off_tbl[0],2); //D7_OFF
 					printf("close light\n");
 					lcd_draw_jpg_file(0,0,"light_off.jpg");
@@ -461,14 +460,14 @@ int main (int argc,char **argv)
 				
 				if(ei==2 && eid == 1)
 				{
-				//²¥·ÅÍ¼Æ¬
+				//æ’­æ”¾å›¾ç‰‡
 					printf("shou picture\n");
 					lcd_draw_jpg_file(0,0,"1.jpg");
 					system("madplay -a -30 show_picture.mp3");
 				}
 				if((ei==2 && eid == 2))
 				{
-				//ÇĞ»»ÏÂÒ»ÕÅÍ¼Æ¬
+				//åˆ‡æ¢ä¸‹ä¸€å¼ å›¾ç‰‡
 					if(i==3) i=-1;
 					printf("next picture\n");
 					lcd_draw_jpg_file(0,0,jpgname[++i]);
@@ -477,7 +476,7 @@ int main (int argc,char **argv)
 						
 				if((ei==2 && eid == 3))
 				{
-					//ÇĞ»»ÉÏÒ»ÕÅÍ¼Æ¬
+					//åˆ‡æ¢ä¸Šä¸€å¼ å›¾ç‰‡
 					if(i==0) i=4;
 					printf("last piture\n");
 					lcd_draw_jpg_file(0,0,jpgname[--i]);	
@@ -485,7 +484,7 @@ int main (int argc,char **argv)
 				}	
 				if(ei==3 && eid == 1)
 				{
-					//²¥·ÅÒôÀÖ
+					//æ’­æ”¾éŸ³ä¹
 					printf("music play\n");
 					lcd_draw_jpg_file(0,0,"play_music.jpg");
 					system("madplay -a -30 play_music.mp3");
@@ -494,7 +493,7 @@ int main (int argc,char **argv)
 				
 				if(ei==3 && eid == 2)
 				{
-					//Í£Ö¹ÒôÀÖ
+					//åœæ­¢éŸ³ä¹
 					printf("music play\n");
 					lcd_draw_jpg_file(0,0,"stop_music.jpg");
 					system("killall -9 madplay");
@@ -504,7 +503,7 @@ int main (int argc,char **argv)
 				if(ei==3 && eid == 3)
 				{
 					
-					//²¥·ÅÊÓÆµ
+					//æ’­æ”¾è§†é¢‘
 					system("killall -9 mplayer");
 					video_flag=1;
 					printf("viode play\n");
@@ -513,7 +512,7 @@ int main (int argc,char **argv)
 				
 				if(ei==4 && eid == 1)
 				{
-					//Â··ÉÍ¬Ñ§
+					//è·¯é£åŒå­¦
 					printf("i am here\n");
 					lcd_draw_jpg_file(0,0,"ack.jpg");
 					system("killall -9 madplay");
@@ -521,18 +520,18 @@ int main (int argc,char **argv)
 				}
 				if((ei==4 && eid == 2)||(ei==4 && eid==3))
 				{
-					//ÍË³ö
+					//é€€å‡º
 					printf("quit voice mode\n");
 					lcd_draw_jpg_file(0,0,"stop_voice_mode.jpg");
 					system("killall -9 madplay");
 					system("madplay -a -30 stop_voice_mode.mp3");
-					sound_mode=0;//ÍË³öÓïÒôÄ£Ê½
+					sound_mode=0;//é€€å‡ºè¯­éŸ³æ¨¡å¼
 				}	
 				choose=0;
 			}
 			usleep(20*1000);
 		}
-		else if((sound_mode==0)&&(gesture_mode==1))  //ÊÖÊÆÄ£Ê½
+		else if((sound_mode==0)&&(gesture_mode==1))  //æ‰‹åŠ¿æ¨¡å¼
 		{
 			
 			usleep(10*1000);
@@ -541,25 +540,25 @@ int main (int argc,char **argv)
 			{
 				if(gesture_value==7)
 				{
-					//ÅÄÕÕ
+					//æ‹ç…§
 					lcd_draw_jpg_file(0,0,"camera.jpg");
 					quit_camera=0;
 					while(quit_camera==0)
 					{
-						//»ñÈ¡ÉãÏñÍ·µÄÊı¾İ
+						//è·å–æ‘„åƒå¤´çš„æ•°æ®
 						linux_v4l2_get_frame(&camera_frame);
 							
-						//ÏÔÊ¾ÉãÏñÍ·µÄÊı¾İ
+						//æ˜¾ç¤ºæ‘„åƒå¤´çš„æ•°æ®
 						lcd_draw_camera(0,0,camera_frame);
 						
 						lcd_draw_jpg_file_ex(710,380,photo[i]);
 						
-						//ÅÄÕÕ±£´æÕÕÆ¬
+						//æ‹ç…§ä¿å­˜ç…§ç‰‡
 						if(snap==1 && show!=1)
 						{
 							snap=0;
 						}
-						//ä¯ÀÀÍ¼Æ¬×´Ì¬ÏÂÏÈÕ¹Ê¾×îºóÒ»ÕÅ£¬È»ºóµÈ´ıshow±ä»¯
+						//æµè§ˆå›¾ç‰‡çŠ¶æ€ä¸‹å…ˆå±•ç¤ºæœ€åä¸€å¼ ï¼Œç„¶åç­‰å¾…showå˜åŒ–
 						if(show==1)
 						{
 							while(show==1) usleep(10*1000);
@@ -572,7 +571,7 @@ int main (int argc,char **argv)
 				
 				if(gesture_value==8)
 				{
-					//ÄæÊ±ÕëÍË³öÅÄÕÕÄ£Ê½
+					//é€†æ—¶é’ˆé€€å‡ºæ‹ç…§æ¨¡å¼
 					quit_camera=1;
 					printf("quit camera\n");
 					lcd_draw_jpg_file(0,0,"stop_camera.jpg");	
@@ -580,7 +579,7 @@ int main (int argc,char **argv)
 
 				if(gesture_value==3)
 				{
-					//ÇĞ»»ÉÏÒ»ÕÅÍ¼Æ¬
+					//åˆ‡æ¢ä¸Šä¸€å¼ å›¾ç‰‡
 					if(i==0) i=4;
 					printf("last piture\n");
 					lcd_draw_jpg_file(0,0,jpgname[--i]);	
@@ -589,7 +588,7 @@ int main (int argc,char **argv)
 				
 				if(gesture_value==4)
 				{
-				//ÇĞ»»ÏÂÒ»ÕÅÍ¼Æ¬
+				//åˆ‡æ¢ä¸‹ä¸€å¼ å›¾ç‰‡
 					if(i==3) i=-1;
 					printf("next picture\n");
 					lcd_draw_jpg_file(0,0,jpgname[++i]);
@@ -599,7 +598,7 @@ int main (int argc,char **argv)
 
 				if(gesture_value==1)
 				{
-					//²¥·ÅÒôÀÖ
+					//æ’­æ”¾éŸ³ä¹
 					printf("music play\n");
 					lcd_draw_jpg_file(0,0,"play_music.jpg");
 					system("killall -9 madplay");
@@ -609,7 +608,7 @@ int main (int argc,char **argv)
 				
 				if(gesture_value==2)
 				{
-					//Í£Ö¹ÒôÀÖ
+					//åœæ­¢éŸ³ä¹
 					printf("music play\n");
 					lcd_draw_jpg_file(0,0,"stop_music.jpg");
 					system("killall -9 madplay");
@@ -618,7 +617,7 @@ int main (int argc,char **argv)
 				
 				if(gesture_value==5)
 				{	
-					//²¥·ÅÊÓÆµ
+					//æ’­æ”¾è§†é¢‘
 					system("killall -9 mplayer");
 					video_flag=1;
 					gesture_video=1;
@@ -628,7 +627,7 @@ int main (int argc,char **argv)
 				
 				if(gesture_value==6)
 				{
-					//Í£Ö¹ÊÓÆµ
+					//åœæ­¢è§†é¢‘
 					system("killall -9 mplayer");
 					lcd_draw_jpg_file(0,0,"stop_video.jpg");
 					lcd_draw_jpg_file(0,0,"stop_video.jpg");
@@ -637,12 +636,12 @@ int main (int argc,char **argv)
 				
 				if(gesture_value==9)
 				{
-					//ÍË³ö
+					//é€€å‡º
 					printf("quit gesture mode\n");
 					lcd_draw_jpg_file(0,0,"stop_gesture_mode.jpg");
 					system("killall -9 madplay");
 					system("madplay -a -30 stop_gesture_mode.mp3");
-					gesture_mode=0;//ÍË³öÊÖÊÆÄ£Ê½
+					gesture_mode=0;//é€€å‡ºæ‰‹åŠ¿æ¨¡å¼
 				}
 			}
 			choose=0;
@@ -650,11 +649,11 @@ int main (int argc,char **argv)
 		else
 		{
 			if(quit_program==0)
-			lcd_draw_jpg_file(0,0,"main.jpg");  //Ä£Ê½Ö÷½çÃæ
+			lcd_draw_jpg_file(0,0,"main.jpg");  //æ¨¡å¼ä¸»ç•Œé¢
 		}
 	}
 	close(fd_led);
-	//¹Ø±ÕÌ×½Ó×Ö
+	//å…³é—­å¥—æ¥å­—
 	close(socket_fd);
 	lcd_close();
 	
