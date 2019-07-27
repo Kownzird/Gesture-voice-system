@@ -218,4 +218,3 @@ int tcp_recv_xml(int socket_fd)
 	return 0;
 }
 
-
