@@ -1,18 +1,5 @@
-/****************************************************************************************
- *ÎÄ¼şÃû³Æ:lcd.c
- *Éè    ¼Æ:ÎÂ×Óì÷
- *ÈÕ    ÆÚ:2015-5-29
- *Ëµ	Ã÷:ÏÔÊ¾jpgÎÄ¼ş
- ----------------------------------------------------------------------------------------
- *ĞŞ¸ÄÈÕÆÚ:2018-6-25
- *Ëµ	Ã÷:ÏÔÊ¾jpg¡¢bmpÎÄ¼ş£¬jpgÓëbmpÊı¾İ¡¢´¿rgbÊı¾İ¡£
- ----------------------------------------------------------------------------------------
- *ĞŞ¸ÄÈÕÆÚ:2018-7-3
- *Ëµ	Ã÷:Ìí¼ÓÁËlcd_draw_cameraº¯Êı£¬×Ô¶¯Ê¶±ğyuyv¸ñÊ½»òjpg¸ñÊ½ÉãÏñÍ·
-			²¢ÏÔÊ¾¡£
-****************************************************************************************/
 #include <stdio.h>   	//printf scanf
-#include <fcntl.h>		//open write read lseek close  	 
+#include <fcntl.h>	//open write read lseek close  	 
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -33,7 +20,7 @@ static int  g_fb_fd;
 static int *g_pfb_memory;
 
 
-//³õÊ¼»¯LCD
+//åˆå§‹åŒ–LCD
 int lcd_open(void)
 {
 	g_fb_fd = open("/dev/fb0", O_RDWR);
@@ -44,25 +31,25 @@ int lcd_open(void)
 			return -1;
 	}
 
-	g_pfb_memory  = (int *)mmap(	NULL, 					//Ó³ÉäÇøµÄ¿ªÊ¼µØÖ·£¬ÉèÖÃÎªNULLÊ±±íÊ¾ÓÉÏµÍ³¾ö¶¨Ó³ÉäÇøµÄÆğÊ¼µØÖ·
-									FB_SIZE, 				//Ó³ÉäÇøµÄ³¤¶È
-									PROT_READ|PROT_WRITE, 	//ÄÚÈİ¿ÉÒÔ±»¶ÁÈ¡ºÍĞ´Èë
-									MAP_SHARED,				//¹²ÏíÄÚ´æ
-									g_fb_fd, 				//ÓĞĞ§µÄÎÄ¼şÃèÊö´Ê
-									0						//±»Ó³Éä¶ÔÏóÄÚÈİµÄÆğµã
+	g_pfb_memory  = (int *)mmap(	NULL, 					//æ˜ å°„åŒºçš„å¼€å§‹åœ°å€ï¼Œè®¾ç½®ä¸ºNULLæ—¶è¡¨ç¤ºç”±ç³»ç»Ÿå†³å®šæ˜ å°„åŒºçš„èµ·å§‹åœ°å€
+									FB_SIZE, 				//æ˜ å°„åŒºçš„é•¿åº¦
+									PROT_READ|PROT_WRITE, 	//å†…å®¹å¯ä»¥è¢«è¯»å–å’Œå†™å…¥
+									MAP_SHARED,				//å…±äº«å†…å­˜
+									g_fb_fd, 				//æœ‰æ•ˆçš„æ–‡ä»¶æè¿°è¯
+									0						//è¢«æ˜ å°„å¯¹è±¡å†…å®¹çš„èµ·ç‚¹
 								);
 
 	return g_fb_fd;
 
 }
 
-//LCD»­µã
+//LCDç”»ç‚¹
 void lcd_draw_point(unsigned int x,unsigned int y, unsigned int color)
 {
 	*(g_pfb_memory+y*800+x)=color;
 }
 
-//BMPÊı¾İ
+//BMPæ•°æ®
 int lcd_draw_bmp(unsigned int x,unsigned int y,unsigned char *bmp_buf,unsigned int bmp_buf_size)   
 {
 	unsigned int blue, green, red;
@@ -79,22 +66,22 @@ int lcd_draw_bmp(unsigned int x,unsigned int y,unsigned char *bmp_buf,unsigned i
 	
 	memcpy(buf,bmp_buf,54);
 	
-	/* ¿í¶È  */
+	/* å®½åº¦  */
 	bmp_width =buf[18];
 	bmp_width|=buf[19]<<8;
 	//printf("bmp_width=%d\r\n",bmp_width);
 	
-	/* ¸ß¶È  */
+	/* é«˜åº¦  */
 	bmp_height =buf[22];
 	bmp_height|=buf[23]<<8;
 	//printf("bmp_height=%d\r\n",bmp_height);	
 	
-	/* ÎÄ¼şÀàĞÍ */
+	/* æ–‡ä»¶ç±»å‹ */
 	bmp_type =buf[28];
 	bmp_type|=buf[29]<<8;
 	//printf("bmp_type=%d\r\n",bmp_type);	
 
-	/* ÉèÖÃÏÔÊ¾x¡¢y×ø±ê½áÊøÎ»ÖÃ */
+	/* è®¾ç½®æ˜¾ç¤ºxã€yåæ ‡ç»“æŸä½ç½® */
 	x_e = x + bmp_width;
 	y_e = y + bmp_height;
 	
@@ -105,18 +92,18 @@ int lcd_draw_bmp(unsigned int x,unsigned int y,unsigned char *bmp_buf,unsigned i
 	{
 		for (;x < x_e; x++)
 		{
-			/* »ñÈ¡ºìÂÌÀ¶ÑÕÉ«Êı¾İ */
+			/* è·å–çº¢ç»¿è“é¢œè‰²æ•°æ® */
 			blue  = *pbmp_buf++;
 			green = *pbmp_buf++;
 			red   = *pbmp_buf++;
 			
-			/* ÅĞ¶Ïµ±Ç°µÄÎ»Í¼ÊÇ·ñ32Î»ÑÕÉ« */
+			/* åˆ¤æ–­å½“å‰çš„ä½å›¾æ˜¯å¦32ä½é¢œè‰² */
 			if(bmp_type == 32)
 			{
 				pbmp_buf++;
 			}
 			
-			/* ×é³É24bitÑÕÉ« */
+			/* ç»„æˆ24bité¢œè‰² */
 			color = red << 16 | green << 8 | blue << 0;
 			lcd_draw_point(x, y, color);				
 		}
@@ -128,7 +115,7 @@ int lcd_draw_bmp(unsigned int x,unsigned int y,unsigned char *bmp_buf,unsigned i
 	return 0;
 }
 
-//LCDÈÎÒâµØÖ·»æÖÆÍ¼Æ¬
+//LCDä»»æ„åœ°å€ç»˜åˆ¶å›¾ç‰‡
 int lcd_draw_bmp_file(unsigned int x,unsigned int y,const char *pbmp_path)   
 {
 			 int bmp_fd;
@@ -146,7 +133,7 @@ int lcd_draw_bmp_file(unsigned int x,unsigned int y,const char *pbmp_path)
 	unsigned char *pbmp_buf=g_color_buf;
 	unsigned char *tmp_buf=NULL;
 	
-	/* ÉêÇëÎ»Í¼×ÊÔ´£¬È¨ÏŞ¿É¶Á¿ÉĞ´ */	
+	/* ç”³è¯·ä½å›¾èµ„æºï¼Œæƒé™å¯è¯»å¯å†™ */	
 	bmp_fd=open(pbmp_path,O_RDWR);
 	
 	if(bmp_fd == -1)
@@ -156,38 +143,38 @@ int lcd_draw_bmp_file(unsigned int x,unsigned int y,const char *pbmp_path)
 	   return -1;	
 	}
 	
-	/* ¶ÁÈ¡Î»Í¼Í·²¿ĞÅÏ¢ */
+	/* è¯»å–ä½å›¾å¤´éƒ¨ä¿¡æ¯ */
 	read(bmp_fd,buf,54);
 	
-	/* ¿í¶È  */
+	/* å®½åº¦  */
 	bmp_width =buf[18];
 	bmp_width|=buf[19]<<8;
 	//printf("bmp_width=%d\r\n",bmp_width);
 	
-	/* ¸ß¶È  */
+	/* é«˜åº¦  */
 	bmp_height =buf[22];
 	bmp_height|=buf[23]<<8;
 	//printf("bmp_height=%d\r\n",bmp_height);	
 	
-	/* ÎÄ¼şÀàĞÍ */
+	/* æ–‡ä»¶ç±»å‹ */
 	bmp_type =buf[28];
 	bmp_type|=buf[29]<<8;
 	//printf("bmp_type=%d\r\n",bmp_type);	
 
-	/* ÉèÖÃÏÔÊ¾x¡¢y×ø±ê½áÊøÎ»ÖÃ */
+	/* è®¾ç½®æ˜¾ç¤ºxã€yåæ ‡ç»“æŸä½ç½® */
 	x_e = x + bmp_width;
 	y_e = y + bmp_height;
 	
-	/* »ñÈ¡Î»Í¼ÎÄ¼şµÄ´óĞ¡ */
+	/* è·å–ä½å›¾æ–‡ä»¶çš„å¤§å° */
 	bmp_size=file_size_get(pbmp_path);
 	
-	/* ¶ÁÈ¡ËùÓĞRGBÊı¾İ */
+	/* è¯»å–æ‰€æœ‰RGBæ•°æ® */
 	read(bmp_fd,pbmp_buf,bmp_size-54);
 	
-	//ÉêÇëÄÚ´æ¿Õ¼äÓÃÓÚ´æ´¢½«YÖá¾µÏñ·­×ªµÄÎ»Í¼Êı¾İ
+	//ç”³è¯·å†…å­˜ç©ºé—´ç”¨äºå­˜å‚¨å°†Yè½´é•œåƒç¿»è½¬çš„ä½å›¾æ•°æ®
 	tmp_buf=(char *)calloc(1,bmp_size);
 	
-	//½«Í¼Æ¬·­×ª,¹Ø¼ü½«YÖá¾µÏñ·­×ª£¬Í¬Ê±Ã¿¸öÏñËØµãÕ¼ÓÃ3¸ö×Ö½Ú
+	//å°†å›¾ç‰‡ç¿»è½¬,å…³é”®å°†Yè½´é•œåƒç¿»è½¬ï¼ŒåŒæ—¶æ¯ä¸ªåƒç´ ç‚¹å ç”¨3ä¸ªå­—èŠ‚
 	for(y=0;y<bmp_height;y++)
 	{
 		for(x=0;x<bmp_width;x++)
@@ -205,18 +192,18 @@ int lcd_draw_bmp_file(unsigned int x,unsigned int y,const char *pbmp_path)
 	{
 		for (;x < x_e; x++)
 		{
-			/* »ñÈ¡ºìÂÌÀ¶ÑÕÉ«Êı¾İ */
+			/* è·å–çº¢ç»¿è“é¢œè‰²æ•°æ® */
 			blue  = *pbmp_buf++;
 			green = *pbmp_buf++;
 			red   = *pbmp_buf++;
 			
-			/* ÅĞ¶Ïµ±Ç°µÄÎ»Í¼ÊÇ·ñ32Î»ÑÕÉ« */
+			/* åˆ¤æ–­å½“å‰çš„ä½å›¾æ˜¯å¦32ä½é¢œè‰² */
 			if(bmp_type == 32)
 			{
 				pbmp_buf++;
 			}
 			
-			/* ×é³É24bitÑÕÉ« */
+			/* ç»„æˆ24bité¢œè‰² */
 			color = red << 16 | green << 8 | blue << 0;
 			lcd_draw_point(x, y, color);				
 		}
@@ -224,20 +211,20 @@ int lcd_draw_bmp_file(unsigned int x,unsigned int y,const char *pbmp_path)
 		x = x_s;
 	}
 	
-	//ÊÍ·ÅÄÚ´æ
+	//é‡Šæ”¾å†…å­˜
 	free(tmp_buf);
 	
-	/* ²»ÔÙÊ¹ÓÃBMP£¬ÔòÊÍ·Åbmp×ÊÔ´ */
+	/* ä¸å†ä½¿ç”¨BMPï¼Œåˆ™é‡Šæ”¾bmpèµ„æº */
 	close(bmp_fd);	
 	
 	return 0;
 }
 
 
-//jpgÊı¾İ
+//jpgæ•°æ®
 int lcd_draw_jpg(unsigned int x,unsigned int y,char *pjpg_buf,unsigned int jpg_buf_size)  
 {
-	/*¶¨Òå½âÂë¶ÔÏó£¬´íÎó´¦Àí¶ÔÏó*/
+	/*å®šä¹‰è§£ç å¯¹è±¡ï¼Œé”™è¯¯å¤„ç†å¯¹è±¡*/
 	struct 	jpeg_decompress_struct 	cinfo;
 	struct 	jpeg_error_mgr 			jerr;	
 	
@@ -257,47 +244,45 @@ int lcd_draw_jpg(unsigned int x,unsigned int y,char *pjpg_buf,unsigned int jpg_b
 	unsigned int 	jpg_width;
 	unsigned int 	jpg_height;
 	
-
-
 	jpg_size = jpg_buf_size;
 		
 	pjpg = pjpg_buf;
 
 
-	/*×¢²á³ö´í´¦Àí*/
+	/*æ³¨å†Œå‡ºé”™å¤„ç†*/
 	cinfo.err = jpeg_std_error(&jerr);
 
-	/*´´½¨½âÂë*/
+	/*åˆ›å»ºè§£ç */
 	jpeg_create_decompress(&cinfo);
 
-	/*Ö±½Ó½âÂëÄÚ´æÊı¾İ*/		
+	/*ç›´æ¥è§£ç å†…å­˜æ•°æ®*/		
 	jpeg_mem_src(&cinfo,pjpg,jpg_size);
 	
-	/*¶ÁÎÄ¼şÍ·*/
+	/*è¯»æ–‡ä»¶å¤´*/
 	jpeg_read_header(&cinfo, TRUE);
 
-	/*¿ªÊ¼½âÂë*/
+	/*å¼€å§‹è§£ç */
 	jpeg_start_decompress(&cinfo);	
 	
 	x_e	= x_s+cinfo.output_width;
 	y_e	= y  +cinfo.output_height;	
 
-	/*¶Á½âÂëÊı¾İ*/
+	/*è¯»è§£ç æ•°æ®*/
 	while(cinfo.output_scanline < cinfo.output_height )
 	{		
 		pcolor_buf = g_color_buf;
 		
-		/* ¶ÁÈ¡jpgÒ»ĞĞµÄrgbÖµ */
+		/* è¯»å–jpgä¸€è¡Œçš„rgbå€¼ */
 		jpeg_read_scanlines(&cinfo,(JSAMPARRAY)&pcolor_buf,1);
 		
 		for(i=0; i<cinfo.output_width; i++)
 		{
-			/* »ñÈ¡rgbÖµ */
+			/* è·å–rgbå€¼ */
 			color = 		*(pcolor_buf+2);
 			color = color | *(pcolor_buf+1)<<8;
 			color = color | *(pcolor_buf)<<16;
 			
-			/* ÏÔÊ¾ÏñËØµã */
+			/* æ˜¾ç¤ºåƒç´ ç‚¹ */
 			lcd_draw_point(x,y,color);
 			
 			pcolor_buf +=3;
@@ -305,13 +290,13 @@ int lcd_draw_jpg(unsigned int x,unsigned int y,char *pjpg_buf,unsigned int jpg_b
 			x++;
 		}
 		
-		/* »»ĞĞ */
+		/* æ¢è¡Œ */
 		y++;			
 		
 		x = x_s;	
 	}		
 				
-	/* ½âÂëÍê³É */
+	/* è§£ç å®Œæˆ */
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 	
@@ -321,7 +306,7 @@ int lcd_draw_jpg(unsigned int x,unsigned int y,char *pjpg_buf,unsigned int jpg_b
 
 int lcd_draw_jpg_file(unsigned int x,unsigned int y,const char *pjpg_path)  
 {
-	/*¶¨Òå½âÂë¶ÔÏó£¬´íÎó´¦Àí¶ÔÏó*/
+	/*å®šä¹‰è§£ç å¯¹è±¡ï¼Œé”™è¯¯å¤„ç†å¯¹è±¡*/
 	struct 	jpeg_decompress_struct 	cinfo;
 	struct 	jpeg_error_mgr 			jerr;	
 	
@@ -359,37 +344,37 @@ int lcd_draw_jpg_file(unsigned int x,unsigned int y,const char *pjpg_path)
 		return -1;
 	}
 
-	/*×¢²á³ö´í´¦Àí*/
+	/*æ³¨å†Œå‡ºé”™å¤„ç†*/
 	cinfo.err = jpeg_std_error(&jerr);
 
-	/*´´½¨½âÂë*/
+	/*åˆ›å»ºè§£ç */
 	jpeg_create_decompress(&cinfo);
 
-	/*Ö¸¶¨½âÂëÊı¾İÀ´Ô´*/		
+	/*æŒ‡å®šè§£ç æ•°æ®æ¥æº*/		
 	jpeg_stdio_src(&cinfo, pjpg_file);
 	
-	/*¶ÁÎÄ¼şÍ·ĞÅÏ¢*/
+	/*è¯»æ–‡ä»¶å¤´ä¿¡æ¯*/
 	jpeg_read_header(&cinfo, TRUE);
 
-	/*¿ªÊ¼½âÂë*/
+	/*å¼€å§‹è§£ç */
 	jpeg_start_decompress(&cinfo);	
 
-	/*¶Á½âÂëÊı¾İ£¬½øĞĞÖğĞĞ¶ÁÈ¡*/
+	/*è¯»è§£ç æ•°æ®ï¼Œè¿›è¡Œé€è¡Œè¯»å–*/
 	while(cinfo.output_scanline < cinfo.output_height )
 	{		
 		pcolor_buf = g_color_buf;
 		
-		/* Ã¿´Î¶ÁÈ¡jpgÒ»ĞĞµÄrgbÖµ */
+		/* æ¯æ¬¡è¯»å–jpgä¸€è¡Œçš„rgbå€¼ */
 		jpeg_read_scanlines(&cinfo,&pcolor_buf,1);
 		
 		for(i=0; i<cinfo.output_width; i++)
 		{
-			/* »ñÈ¡rgbÖµ */
+			/* è·å–rgbå€¼ */
 			color = 		*(pcolor_buf+2);
 			color = color | *(pcolor_buf+1)<<8;
 			color = color | *(pcolor_buf)<<16;
 			
-			/* ÏÔÊ¾ÏñËØµã */
+			/* æ˜¾ç¤ºåƒç´ ç‚¹ */
 			lcd_draw_point(x,y,color);
 			
 			pcolor_buf +=3;
@@ -397,25 +382,25 @@ int lcd_draw_jpg_file(unsigned int x,unsigned int y,const char *pjpg_path)
 			x++;
 		}
 		
-		/* »»ĞĞ */
+		/* æ¢è¡Œ */
 		y++;			
 		
 		x = x_s;
 	}		
 			
-	/*½âÂëÍê³É*/
+	/*è§£ç å®Œæˆ*/
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 
 
-	/* ¹Ø±ÕjpgÎÄ¼ş */
+	/* å…³é—­jpgæ–‡ä»¶ */
 	fclose(pjpg_file);
 
 	return 0;	
 }
 
 
-//LCDÏÔÊ¾ÉãÏñÍ·×ª»»ºóµÄrgbÊı¾İ
+//LCDæ˜¾ç¤ºæ‘„åƒå¤´è½¬æ¢åçš„rgbæ•°æ®
 int lcd_draw_rgb(unsigned int x,unsigned int y,unsigned int rgb_width,unsigned int rgb_height,unsigned char *rgb_buf)   
 {
 	unsigned int blue, green, red;
@@ -433,7 +418,7 @@ int lcd_draw_rgb(unsigned int x,unsigned int y,unsigned int rgb_width,unsigned i
 	{
 		for (;x < x_e; x++)
 		{
-				/* »ñÈ¡ºìÂÌÀ¶ÑÕÉ«Êı¾İ */
+				/* è·å–çº¢ç»¿è“é¢œè‰²æ•°æ® */
 				color = 		*(prgb_buf+2);
 				color = color | *(prgb_buf+1)<<8;
 				color = color | *(prgb_buf)<<16;
@@ -449,26 +434,26 @@ int lcd_draw_rgb(unsigned int x,unsigned int y,unsigned int rgb_width,unsigned i
 	return 0;
 }
 
-//ÏÔÊ¾ÉãÏñÍ·Êı¾İ
+//æ˜¾ç¤ºæ‘„åƒå¤´æ•°æ®
 int lcd_draw_camera(unsigned int x,unsigned int y,FrameBuffer framebuf_t)  
 {
 	int camera_support_format=-1;
 	int rt=0;
 	unsigned int width,height;
 	
-	//»ñÈ¡ÉãÏñÍ·Ö§³ÖµÄ¸ñÊ½
+	//è·å–æ‘„åƒå¤´æ”¯æŒçš„æ ¼å¼
 	camera_support_format=linux_v4l2_get_format();
 	
 	if(camera_support_format < 0)
 		return -1;
 	
-	//»ñÈ¡ÉãÏñÍ·µ±Ç°Ö§³ÖµÄ·Ö±æÂÊ
+	//è·å–æ‘„åƒå¤´å½“å‰æ”¯æŒçš„åˆ†è¾¨ç‡
 	rt=linux_v4l2_get_resolution(&width,&height);
 	
 	if(rt < 0)
 		return -1;
 	
-	//¸ù¾İÉãÏñÍ·Ö§³ÖµÄ¸ñÊ½£¬ÏÔÊ¾µ½LCDÆÁ
+	//æ ¹æ®æ‘„åƒå¤´æ”¯æŒçš„æ ¼å¼ï¼Œæ˜¾ç¤ºåˆ°LCDå±
 	if(camera_support_format == V4L2_PIX_FMT_YUYV)		
 		lcd_draw_rgb(x,y,width,height,framebuf_t.buf);
 	
@@ -480,20 +465,20 @@ int lcd_draw_camera(unsigned int x,unsigned int y,FrameBuffer framebuf_t)
 
 
 
-//LCD¹Ø±Õ
+//LCDå…³é—­
 void lcd_close(void)
 {
-	/* È¡ÏûÄÚ´æÓ³Éä */
+	/* å–æ¶ˆå†…å­˜æ˜ å°„ */
 	munmap(g_pfb_memory, FB_SIZE);
 	
-	/* ¹Ø±ÕLCDÉè±¸ */
+	/* å…³é—­LCDè®¾å¤‡ */
 	close(g_fb_fd);
 }
 
-//ËõÂÔÍ¼ÏÔÊ¾
+//ç¼©ç•¥å›¾æ˜¾ç¤º
 int lcd_draw_jpg_file_ex(unsigned int x,unsigned int y,const char *pjpg_path)  
 {
-	/*¶¨Òå½âÂë¶ÔÏó£¬´íÎó´¦Àí¶ÔÏó*/
+	/*å®šä¹‰è§£ç å¯¹è±¡ï¼Œé”™è¯¯å¤„ç†å¯¹è±¡*/
 	struct 	jpeg_decompress_struct 	cinfo;
 	struct 	jpeg_error_mgr 			jerr;	
 	
@@ -531,41 +516,41 @@ int lcd_draw_jpg_file_ex(unsigned int x,unsigned int y,const char *pjpg_path)
 		return -1;
 	}
 
-	/*×¢²á³ö´í´¦Àí*/
+	/*æ³¨å†Œå‡ºé”™å¤„ç†*/
 	cinfo.err = jpeg_std_error(&jerr);
 
-	/*´´½¨½âÂë*/
+	/*åˆ›å»ºè§£ç */
 	jpeg_create_decompress(&cinfo);
 
-	/*Ö¸¶¨½âÂëÊı¾İÀ´Ô´*/		
+	/*æŒ‡å®šè§£ç æ•°æ®æ¥æº*/		
 	jpeg_stdio_src(&cinfo, pjpg_file);
 	
-	/*¶ÁÎÄ¼şÍ·ĞÅÏ¢*/
+	/*è¯»æ–‡ä»¶å¤´ä¿¡æ¯*/
 	jpeg_read_header(&cinfo, TRUE);
 	
-	//1/2´óĞ¡Êä³öÏÔÊ¾£¬Ö§³Ö1/1¡¢1/4¡¢1/8Êä³öÏÔÊ¾¡£
+	//1/2å¤§å°è¾“å‡ºæ˜¾ç¤ºï¼Œæ”¯æŒ1/1ã€1/4ã€1/8è¾“å‡ºæ˜¾ç¤ºã€‚
 	cinfo.scale_num=1;
 	cinfo.scale_denom=8;
 
-	/*¿ªÊ¼½âÂë*/
+	/*å¼€å§‹è§£ç */
 	jpeg_start_decompress(&cinfo);	
 
-	/*¶Á½âÂëÊı¾İ£¬½øĞĞÖğĞĞ¶ÁÈ¡*/
+	/*è¯»è§£ç æ•°æ®ï¼Œè¿›è¡Œé€è¡Œè¯»å–*/
 	while(cinfo.output_scanline < cinfo.output_height )
 	{		
 		pcolor_buf = g_color_buf;
 		
-		/* Ã¿´Î¶ÁÈ¡jpgÒ»ĞĞµÄrgbÖµ */
+		/* æ¯æ¬¡è¯»å–jpgä¸€è¡Œçš„rgbå€¼ */
 		jpeg_read_scanlines(&cinfo,&pcolor_buf,1);
 		
 		for(i=0; i<cinfo.output_width; i++)
 		{
-			/* »ñÈ¡rgbÖµ */
+			/* è·å–rgbå€¼ */
 			color = 		*(pcolor_buf+2);
 			color = color | *(pcolor_buf+1)<<8;
 			color = color | *(pcolor_buf)<<16;
 			
-			/* ÏÔÊ¾ÏñËØµã */
+			/* æ˜¾ç¤ºåƒç´ ç‚¹ */
 			lcd_draw_point(x,y,color);
 			
 			pcolor_buf +=3;
@@ -573,18 +558,18 @@ int lcd_draw_jpg_file_ex(unsigned int x,unsigned int y,const char *pjpg_path)
 			x++;
 		}
 		
-		/* »»ĞĞ */
+		/* æ¢è¡Œ */
 		y++;			
 		
 		x = x_s;
 	}		
 			
-	/*½âÂëÍê³É*/
+	/*è§£ç å®Œæˆ*/
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 
 
-	/* ¹Ø±ÕjpgÎÄ¼ş */
+	/* å…³é—­jpgæ–‡ä»¶ */
 	fclose(pjpg_file);
 
 	return 0;	
