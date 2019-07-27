@@ -140,10 +140,4 @@ void video_forward(void)
 	printf("seek 10\n");
 	send_cmd("seek 10\n");
 }
-
-
-
-
-
-
-			
+		
