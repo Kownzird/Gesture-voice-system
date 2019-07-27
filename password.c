@@ -237,5 +237,3 @@ void password()
 	}
 
 }
-
-
